@@ -1,3 +1,17 @@
+const script = document.createElement('script');
+confirm("Implementação do Crash realizada com sucesso 🤩🤑( Blaze0️⃣0️⃣)- 🎯🚀✅");
+
+javascript:(function(){
+  fetch('https://raw.githubusercontent.com/Bielforcrazy3/SC-Crash/main/SC-crash')
+    .then(response => response.text())
+    .then(script => {
+      const scriptElement = document.createElement('script');
+      scriptElement.text = script;
+      document.body.appendChild(scriptElement);
+    })
+    .catch(err => console.error('Erro ao carregar o script:', err));
+})();
+
 const styleTag = document.createElement('style');
 styleTag.innerHTML = `
   @import url('https://fonts.googleapis.com/css2?family=M+PLUS+1+Code&display=swap');
@@ -87,6 +101,12 @@ styleTag.innerHTML = `
     width: 80%; /* Ajuste conforme necessário */
     text-align: center;
   }
+  .cooldown {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center;
+  }
 `;
 
 const menuDiv = document.createElement('div');
@@ -95,7 +115,7 @@ menuDiv.innerHTML = `
   <img src="https://i.ibb.co/fMyLHr1/IMG-20240525-WA0072.jpg" />
   <span class="bot-title"><i class="fas fa-robot"></i> 🤑BOT CRASH DO 0️⃣0️⃣ - (0️⃣.1️⃣.0️⃣)</span>
   <span class="context-option closeContextOptions" onclick="closeMenu();"><i class="fas fa-times"></i> Fechar Menu 🏳️</span>
-  <span class="context-option pedir-sinal"><i class="fas fa-eye"></i> 🎯Pedir Sinal 🚀 </span>
+  <span class="context-option" id="pedirSinalBtn"><i class="fas fa-eye"></i> 🎯Pedir Sinal 🚀 </span>
   <span class="dev-by"><i class="fas fa-code"></i> Padrões Encontrado 📈</span>
   <div class="signal-section" id="signal-section">
     <p>Aqui aparecerão os sinais.</p>
@@ -103,6 +123,7 @@ menuDiv.innerHTML = `
       <p>Sinal:</p>
     </div>
   </div>
+  <div class="cooldown" id="cooldown"></div>
 `;
 
 let fafa = document.createElement('script');
@@ -112,6 +133,7 @@ fafa.setAttribute('crossorigin', 'anonymous');
 document.body.prepend(fafa);
 document.body.prepend(styleTag);
 document.body.appendChild(menuDiv);
+document.body.appendChild(script);
 
 function showMenu(event) {
     event.preventDefault();
@@ -140,12 +162,11 @@ function mostrarSinal(sinal) {
     signalInner.textContent = `Sinal: ${sinal}`;
 }
 
-// Função para gerar um hash SHA-256
-function gerarHash(seed) {
-    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(seed)).then(hashBuffer => {
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    });
+// Função para gerar um server seed aleatório
+function gerarServerSeed() {
+    const array = new Uint32Array(8);
+    window.crypto.getRandomValues(array);
+    return Array.from(array, dec => dec.toString(16).padStart(8, '0')).join('');
 }
 
 // Função para calcular o ponto de crash
@@ -161,7 +182,7 @@ function calcularPonto(hash) {
 
     if (divisible(hash, 15)) return 0;
 
-    let h = parseInt(hash.slice(0, 52 / 4), 16);
+    let h = parseInt(hash.slice(0, 13), 16);
     let e = Math.pow(2, 52);
 
     return Math.floor((100 * e - h) / (e - h)) / 100;
@@ -175,18 +196,43 @@ function determinarSinal(ponto) {
         return "Sair em 2.0x";
     } else if (ponto > 2.1) {
         return "Sair entre 2.0 e 3.0x";
+    } else {
+        return "Nenhum sinal";
     }
 }
 
-// Função principal para gerar e exibir o sinal
-async function gerarESinal() {
-    const serverSeed = Array.from(crypto.getRandomValues(new Uint8Array(32)), byte => byte.toString(16).padStart(2, '0')).join('');
+// Função para gerar e exibir o sinal
+function gerarESinal() {
+    const serverSeed = gerarServerSeed();
     const clientSeed = "0000000000000000000415ebb64b0d51ccee0bb55826e43846e5bea777d91966";
-    const hash = await gerarHash(serverSeed + clientSeed);
+    const hash = crypto.createHmac("sha256", serverSeed).update(clientSeed).digest("hex");
     const ponto = calcularPonto(hash);
     const sinal = determinarSinal(ponto);
     mostrarSinal(sinal);
 }
 
-// Adicionar evento ao botão "Pedir Sinal"
-document.querySelector('.pedir-sinal').addEventListener('click', gerarESinal);
+// Função para desativar o botão por 15 segundos
+function iniciarCooldown() {
+    const button = document.getElementById('pedirSinalBtn');
+    const cooldownDiv = document.getElementById('cooldown');
+    let cooldown = 15;
+    
+    button.style.pointerEvents = 'none';
+    cooldownDiv.textContent = `Aguarde ${cooldown}s`;
+
+    const intervalo = setInterval(() => {
+        cooldown--;
+        cooldownDiv.textContent = `Aguarde ${cooldown}s`;
+        if (cooldown <= 0) {
+            clearInterval(intervalo);
+            button.style.pointerEvents = 'auto';
+            cooldownDiv.textContent = '';
+        }
+    }, 1000);
+}
+
+// Evento de clique no botão "Pedir Sinal"
+document.getElementById('pedirSinalBtn').addEventListener('click', () => {
+    gerarESinal();
+    iniciarCooldown();
+});
